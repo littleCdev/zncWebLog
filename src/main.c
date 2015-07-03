@@ -190,9 +190,9 @@ int main(void) {
 		RestApiAddRule(&Api,"/changepw/"				,"GET"	,&ApiUserChangePassword	,STRCMP);
 		RestApiAddRule(&Api,"/networks/"				,"GET"	,&ApiUserListNetworks	,STRCMP);
 		RestApiAddRule(&Api,"^/network/[A-Za-z0-9]+$"	,"GET"	,&ApiUserShowNetwork	,REGEX);
-		//							networkname	 chan/query		   file
-		RestApiAddRule(&Api,"^/log/[A-Za-z0-9]+/[#A-Za-z0-9_\\.-]+/[A-Za-z0-9_-]+\\.log/$"	,"GET"	,&ApiUserShowLog	,REGEX);
-		RestApiAddRule(&Api,"^/log/[A-Za-z0-9]+/[#A-Za-z0-9_\\.-]+/[A-Za-z0-9_-]+\\.log/$"	,"POST"	,&ApiUserSendLogJson,REGEX);
+		//							networkname	 	chan/query		   file
+		RestApiAddRule(&Api,"^/log/[A-Za-z0-9-_\\.]+/[#A-Za-z0-9_\\.-]+/[A-Za-z0-9_-]+\\.log/$"	,"GET"	,&ApiUserShowLog	,REGEX);
+		RestApiAddRule(&Api,"^/log/[A-Za-z0-9-_\\.]+/[#A-Za-z0-9_\\.-]+/[A-Za-z0-9_-]+\\.log/$"	,"POST"	,&ApiUserSendLogJson,REGEX);
 
 		RestApiAddRule(&Api,"/favicon.ico"				,"GET"	,&ApiFavIco				,STRCMP);
 		RestApiAddRule(&Api,"^/css/[A-Za-z0-9.-]+$"		,"GET"	,&ApiUserSendCssJs		,REGEX);
