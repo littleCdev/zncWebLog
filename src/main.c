@@ -189,7 +189,7 @@ int main(void) {
 		RestApiAddRule(&Api,"/changepw/"				,"POST"	,&ApiUserChangePassword	,STRCMP);
 		RestApiAddRule(&Api,"/changepw/"				,"GET"	,&ApiUserChangePassword	,STRCMP);
 		RestApiAddRule(&Api,"/networks/"				,"GET"	,&ApiUserListNetworks	,STRCMP);
-		RestApiAddRule(&Api,"^/network/[A-Za-z0-9]+$"	,"GET"	,&ApiUserShowNetwork	,REGEX);
+		RestApiAddRule(&Api,"^/network/[A-Za-z0-9-_\\]+$","GET"	,&ApiUserShowNetwork	,REGEX);
 		//							networkname	 	chan/query		   file
 		RestApiAddRule(&Api,"^/log/[A-Za-z0-9-_\\.]+/[#A-Za-z0-9_\\.-]+/[A-Za-z0-9_-]+\\.log/$"	,"GET"	,&ApiUserShowLog	,REGEX);
 		RestApiAddRule(&Api,"^/log/[A-Za-z0-9-_\\.]+/[#A-Za-z0-9_\\.-]+/[A-Za-z0-9_-]+\\.log/$"	,"POST"	,&ApiUserSendLogJson,REGEX);
