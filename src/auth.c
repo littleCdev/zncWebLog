@@ -202,8 +202,8 @@ _Bool lcAuthAddUser(char *sName, char *sPass, _Bool Admin, char *sError){
         SETERROR(sError, "Names aren't allowed to contain |");
         return FALSE;
     }
-    if(lcStrlen(sName)<6 || lcStrlen(sName)>NAMEMAXLEN){
-        SETERROR(sError, "Name is too short or too long (6 char min)");
+    if(lcStrlen(sName)>NAMEMAXLEN){
+        SETERROR(sError, "Name too long");
         return FALSE;
 	}
     if(lcStrlen(sPass)<6 ){
