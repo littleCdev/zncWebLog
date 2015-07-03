@@ -1,0 +1,58 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          zncWebLogd
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts/Stops the zncWebLogd
+# Description:       -^
+### END INIT INFO
+pidFile='/var/run/zwl.pid'
+pid=`cat ${pidFile}`
+case "$1" in
+	start)
+		if kill -s 0 ${pid} > /dev/null 2>&1 ; then
+			echo "zncWebLog is already running!"
+			exit 0
+		fi
+	
+		/usr/local/bin/zncWebLogd
+		sleep 0.2s
+		pid=`cat ${pidFile}`
+		if kill -s 0 ${pid} > /dev/null 2>&1 ; then
+			echo "Started"
+			exit 0
+		else
+			echo "failed to start, see error or logfile for information"
+		fi
+	
+	;;
+	
+	stop)
+		if  ! kill -s 0 ${pid} > /dev/null 2>&1 ; then
+			echo "can't stop what's already stopped!"
+			exit 0
+		fi
+
+		kill -USR2 ${pid}
+		sleep 0.5s;
+	
+		if kill -s 0 ${pid} > /dev/null 2>&1 ; then
+			echo "seems like i can't stopp this!? :("
+		else
+			echo "stopped"
+		fi
+	;;
+	
+	status)
+	;;
+	
+	reload)
+	;;
+	
+	*)
+	
+	;;
+esac
+exit 0

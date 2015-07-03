@@ -1,0 +1,63 @@
+<html>
+    <head>
+		<link rel="stylesheet" href="/css/bootstrap.min.css">
+		<script src="/js/jquery.js"></script>
+		<script src="/js/bootstrap.min.js"></script>
+		<script src="/js/ajax.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+	{include menu.html}
+	<div class="container-fluid">
+	  <h2>Network: {$sNetworkName}</h2>
+		<a id="loadMore" href="#">Load more!</a>
+		<input id="endReached" type="hidden" value="{if bEndReached}1{else}0{endif}">
+		<input id="lines" type="hidden" value="{$iLines}">
+		<pre id="log">{$sLog}</pre>
+	</div>	
+	<script>
+		var bEndReached = false;
+		var iLines	= $("#lines").val();
+		
+		if($("#endReached").val() == 1)
+			bEndReached = true;
+			
+		
+		$("#loadMore").on("click",function(e){
+			e.preventDefault();
+			if(bEndReached == true)
+				return;
+			
+			var r = srq();
+			r.addData("Start",iLines);
+			
+			r.success = function(e){
+				console.log(r.getValue("error"));
+				if(r.getValue("error")==1){
+				console.log("mauuuu?");
+					alert(r.getValue("msg"));
+				}else{
+					if(r.getValue("endReached")==1)
+						bEndReached = true;
+					
+					// fuck javascript
+					iLines =parseInt(iLines) + parseInt($("#lines").val());
+					
+					// create a hidden element to save the position
+					var posid = Math.random().toString(36).substring(7);
+					
+					$("#log").prepend("<hr id=\""+posid+"\">");
+					$("#log").prepend(r.getValue("log"));
+					
+					$(document).scrollTop($("#"+posid).offset().top-50);
+				}
+				
+			};
+			r.submit();
+		});
+		
+	</script>
+    </body>
+
+</html>
+

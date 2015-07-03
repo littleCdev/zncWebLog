@@ -1,0 +1,31 @@
+<html>
+    <head>
+		<link rel="stylesheet" href="/css/bootstrap.min.css">
+		<script src="/js/jquery.js"></script>
+		<script src="/js/bootstrap.min.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+	{include menu.html}
+	<div class="container-fluid">
+	  <h2>Network: {$sNetworkName}</h2>
+		<div class="panel panel-primary">
+			{$UsersAndChans}
+		</div>
+	</div>	
+	<script>
+		$("div.slideup").hide();
+		
+		$("h3.slideup").on("click",function(e){
+			var name=$(this).attr("data");
+			$('div.'+name).slideToggle('fast',function(e){
+				if ($('div.'+name).is(':visible'))
+					$("span."+name).removeClass("glyphicon-folder-close").addClass("glyphicon-folder-open");
+				else
+					$("span."+name).removeClass("glyphicon-folder-open").addClass("glyphicon-folder-close	");
+			});
+		})
+	</script>
+    </body>
+
+</html>
