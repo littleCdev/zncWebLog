@@ -1,9 +1,5 @@
 #include "auth.h"
 
-int lcCheckLogin( char *sName, char *sPass){
-    return 0;
-}
-
 char *lcGenCookie( char *sName, char *sPass){
     char *sRet      	= NULL;
     char *sMd5Pw    	= NULL;

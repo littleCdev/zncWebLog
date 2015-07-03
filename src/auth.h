@@ -38,7 +38,6 @@
 		char 		*sUserDir;
 	}lcUser;
 
-	int lcCheckLogin( char *sName, char *sPass);
 	char *lcGenCookie( char *sName, char *sPass);
 	_Bool lcAuthCheckCookie(struct mg_connection *conn,lcUser *User);
 	_Bool lcAuthAddUser(char *sName, char *sPass, _Bool Admin, char *sError);
