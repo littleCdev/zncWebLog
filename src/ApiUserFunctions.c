@@ -218,6 +218,7 @@ int ApiUserSendLogJson(struct mg_connection *conn, struct lcUser *User){
 
 		char *sMsgBase64 = base64_encode("your requested log doesn't exist",strlen("your requested log doesn't exist"),&i);
 		syslog(LOG_INFO,"%s does not exist",sLog);
+		mg_send_header(conn, "Content-type", "text/html;charset=utf-8");
 		mg_printf_data(conn,"{"
 						  "\"error\":\"MQ==\","
 						  "\"msg\":\"%s\""
@@ -234,6 +235,7 @@ int ApiUserSendLogJson(struct mg_connection *conn, struct lcUser *User){
 		
 		char *sLogBase64 = base64_encode(sLog,strlen(sLog),&i);
 		char *sEndReachedBas64 = base64_encode((iEndReached==1?"1":"0"),1,&i);
+		mg_send_header(conn, "Content-type", "text/html;charset=utf-8");
 		mg_printf_data(conn,"{"
 						  "\"error\":\"MTMzNw==\","
 						  "\"endReached\":\"%s\","
