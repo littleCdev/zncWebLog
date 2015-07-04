@@ -42,4 +42,12 @@ install: $(OUTNAME)
 	cp ./install/rsyslog.d/30-zncWebLog.conf /etc/rsyslog.d/30-zncWebLog.conf
 	-service rsyslog restart
 	@./install_config.sh
+
+update: $(OUTNAME)
+	-/etc/init.d/zncWebLog stop
+	rm -rf /etc/zncWebLog/HTML/
+	mkdir /etc/zncWebLog/HTML/
+	cp -r src/HTML/* /etc/zncWebLog/HTML/
+	cp zncWebLogd /usr/local/bin/
+	-/etc/init.d/zncWebLog start
 	

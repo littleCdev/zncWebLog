@@ -16,6 +16,8 @@ else
 	chown ${user} ${configfile}
 	chown ${user} /var/run/zwl.pid
 	chown ${user} -R /etc/zncWebLog/
+	chown ${user} /etc/init.d/zncWebLog
+	chown ${user} /usr/local/bin/zncWebLogd
 fi
 
 
