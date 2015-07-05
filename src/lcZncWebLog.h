@@ -9,15 +9,10 @@
 	#define NETWORKMAXLEN  	100
 	#define ERRORLEN    	200
 	
-	#define CFGFILE		"/etc/zncWebLog/zncWebLog.cfg"
+	#define CFGFILE			"/etc/zncWebLog/zncWebLog.cfg"
 	
-	#undef _DEBUG_
-	#ifdef _DEBUG_
-		#define debug(args...) fprintf(stderr,args);fprintf(stderr,"\r\n")
-	#else
-		#define debug(args...)
-	#endif
-
+	#define debug(args...) 					if(CFG.bDebug){fprintf(stderr,args);fprintf(stderr,"\r\n");}
+	
 	#define SETERROR(ptr,format,...)		snprintf(ptr,ERRORLEN,format,##__VA_ARGS__)
 	
 	// i used my own defines before, now i'm using stdbool.h
@@ -32,6 +27,8 @@
 
 	typedef struct {
 		/* from the configfile*/
+		_Bool	bDebug;
+		
 		_Bool	bHttp;	
 		char 	*sHttpPort;
 		
@@ -54,6 +51,7 @@
 
 	#ifdef LC_GLOBALS_MAIN
 		lcCFG CFG = {
+			.bDebug			= false,
 			
 			.bHttp			= true,
 			.sHttpPort		= "8000",

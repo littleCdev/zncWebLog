@@ -86,6 +86,7 @@ void loadIni(){
     CFG.sPasswdFile = lcConfigGetString(Ini,"PasswdFile");
     CFG.iLogLines	= strtol(lcConfigGetString(Ini,"logLines"),NULL,0);
     CFG.sZncUserDir	= lcConfigGetString(Ini,"zncUserDir");
+    CFG.bDebug		= strcmp(lcConfigGetString(Ini,"debug"),"1")==0?TRUE:FALSE;
     
 	char *sLoglevel = lcConfigGetString(Ini,"loglevel");
 	if(sLoglevel == NULL){
@@ -141,10 +142,15 @@ int main(void) {
 	
 	loadIni();
 	
-	startDeamon();
-
-    openlog( "zncWebLog", LOG_CONS|LOG_PID|LOG_NDELAY, LOG_LOCAL0);
-	syslog(LOG_INFO,"started deamon");
+	openlog( "zncWebLog", LOG_CONS|LOG_PID|LOG_NDELAY, LOG_LOCAL0);
+	
+	if(!CFG.bDebug){
+		startDeamon();
+		syslog(LOG_INFO,"started deamon");
+	}else{
+		debug("debugmode, not forking to background");
+		syslog(LOG_INFO,"debugmode, not forking to background");
+	}
 	
     // Create and configure the server
 	server = mg_create_server(NULL, ev_handler);
