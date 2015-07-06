@@ -312,6 +312,7 @@ int ApiUserLogin(struct mg_connection *conn, struct lcUser *User){
 			sString = lcStringCreate( "HTTP/1.1 301 Moved Permanently \r\nLocation: /networks/\r\nSet-Cookie: znc=%s;path=/\r\n\r\n",sCookieContent);
         
         mg_printf(conn, sString);
+        mg_send_header(conn,"connection","close true");
  
         lcFree(sString);
         lcFree(sCookieContent);
