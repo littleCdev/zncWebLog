@@ -206,9 +206,13 @@ int main(void) {
 		RestApiAddRule(&Api,"^/js/[A-Za-z0-9.-]+$"		,"GET"	,&ApiUserSendCssJs		,REGEX);
 		
 		RestApiAddRule(&Api,"/admin/"					,"GET"	,&ApiAdminShowIndex		,STRCMP);
-		RestApiAddRule(&Api,"/admin/Users"				,"GET"	,&ApiAdminShowIndex		,STRCMP);
+		RestApiAddRule(&Api,"/admin/Users"				,"GET"	,&ApiAdminUsers			,STRCMP);
 		RestApiAddRule(&Api,"/admin/Users!Add"			,"GET"	,&ApiAdminUserAddGET	,STRCMP);
 		RestApiAddRule(&Api,"/admin/Users!Add"			,"POST"	,&ApiAdminUserAddGET	,STRCMP);
+		RestApiAddRule(&Api,"^/admin/Users!Delete![A-Za-z0-9_\\-]+$"	,"GET"	,&ApiAdminUserDelete	,REGEX);
+		RestApiAddRule(&Api,"^/admin/Users!Delete![A-Za-z0-9_\\-]+$"	,"POST"	,&ApiAdminUserDelete	,REGEX);
+		RestApiAddRule(&Api,"^/admin/Users!Edit![A-Za-z0-9_\\-]+$"		,"GET"	,&ApiAdminUserAddGET	,REGEX);
+		RestApiAddRule(&Api,"^/admin/Users!Edit![A-Za-z0-9_\\-]+$"		,"POST"	,&ApiAdminUserAddGET	,REGEX);
 		
 		if(CFG.bHttp)
 			mg_start_thread(MongoseServe, server);
