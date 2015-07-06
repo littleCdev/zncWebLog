@@ -62,8 +62,17 @@ void lcTemplateClean(struct lcTemplate *tpl){
 	lcFree(tpl);
 }
 
-int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValue){
+int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValueFmt, ... ){
 	
+    va_list arg;
+    char *sValue;
+    
+    va_start( arg, sValueFmt );
+    if(!vasprintf(&sValue,sValueFmt,arg)){
+		perror("vasprintf");
+		return 0;
+	}
+    va_end(arg);
 	
 	// first let's check if variable already exists
 	int i;
@@ -73,6 +82,8 @@ int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValue
 			strcpy(tpl->vars->Variables[i]->sValue,sValue);
 			tpl->vars->Variables[i]->sValue[strlen(sValue)] = '\0';
 			debug("template.c: reset %s to %s\n",sName,sValue);
+	
+			free(sValue);
 			return 0;
 		}
 	}
@@ -94,6 +105,8 @@ int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValue
 	
 	tpl->vars->iVariables++;
 
+
+	free(sValue);
 	return 0;
 }
 

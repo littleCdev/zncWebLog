@@ -79,7 +79,7 @@
 	int _processCodeblock(codeblock *con, struct lcTemplate *tpl );
 	int _lcTemplateCheckCodeblock(struct variableContainer *vars,codeblock *con);
 	codeblock *_lcTemplateFindCodeblock(char *s);
-	int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValue);
+	int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValueFmt, ... );
 	int lcTemplateAddVariableInt(struct lcTemplate *tpl, char *sName,int iValue);
 	int findNext(lcConditionPositions what,codeblock *con,int iStartPos);
 	void _lcTemplateCleanCodeblock(codeblock *con);
