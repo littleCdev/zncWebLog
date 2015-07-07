@@ -11,7 +11,7 @@
 	
 	#define CFGFILE			"/etc/zncWebLog/zncWebLog.cfg"
 	
-	#define debug(args...) 					if(CFG.bDebug){fprintf(stderr,args);fprintf(stderr,"\r\n");}
+	#define debug(args...) 					if(CFG.bDebug){fprintf(stderr,"%s:%i ",__FILE__,__LINE__);fprintf(stderr,args);fprintf(stderr,"\r\n");}
 	
 	#define SETERROR(ptr,format,...)		snprintf(ptr,ERRORLEN,format,##__VA_ARGS__)
 	
