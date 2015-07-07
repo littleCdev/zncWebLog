@@ -66,14 +66,20 @@ int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValue
 	
     va_list arg;
     char *sValue;
-    
-    va_start( arg, sValueFmt );
-    if(!vasprintf(&sValue,sValueFmt,arg)){
-		perror("vasprintf");
-		return 0;
+   
+	if(strlen(sValueFmt)>0){
+		va_start( arg, sValueFmt );
+		if(!vasprintf(&sValue,sValueFmt,arg)){
+			debug("%s:%i name=%s sValueFmt=%s",__FILE__,__LINE__,sName,sValueFmt);
+			perror("vasprintf");
+			return 0;
+		}
+		va_end(arg);
+	}else{
+		sValue = malloc(1);
+		sValue[0] = '\0';
 	}
-    va_end(arg);
-	
+
 	// first let's check if variable already exists
 	int i;
 	for(i=0;i<tpl->vars->iVariables;i++){
