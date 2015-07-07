@@ -99,34 +99,57 @@ _Bool lcAuthCheckCookie(struct mg_connection *conn,lcUser *User){
     char *sFileContent  = NULL;
     FILE *fPassFile     = NULL;
     char *sPasswdFile   = NULL;
-   
+	char *sCookie		= NULL;
+	char *sCookies;
 	User->sName			= lcStringCreate("");
 	User->sUserDir		= lcStringCreate("");
     
     if(CFG.bFirstRun){
 		return FALSE;
 	}
-    
-    char *sCookie       = (char *)mg_get_header(conn, "Cookie");
-    if(sCookie == NULL){
+
+    // cookies may look like:
+    // znc=MTIzNDU2$r10nqp3949on59noor56r057s20s883r
+    // PHPSESSID=6lpjo6aej17mv3dpa09lcc8874; znc=MTIzNDU2$r10nqp3949on59noor56r057s20s883r
+    // PHPSESSID=6lpjo6aej17mv3dpa09lcc8874; znc=MTIzNDU2$r10nqp3949on59noor56r057s20s883r; test=true
+    sCookies       = (char *)mg_get_header(conn, "Cookie");
+    if(sCookies == NULL){
         User->login = FALSE;
         return FALSE;
     }
+    debug("sCookies:%s",sCookies);
     
+    int iCookieStart = lcStrStr(sCookies,"znc=");
+    if(iCookieStart == -1){
+		debug("no cookie found");
+		return FALSE;
+	}
+
+	// +4 because of "znc="
+	iCookieStart+=4;
+	
+	int iCookieEnd = lcStrStr(sCookies+iCookieStart,";");
+	if(iCookieEnd == -1){
+		sCookie = lcStringCreate(sCookies+iCookieStart);
+	}else{
+		int iLen = iCookieEnd-iCookieStart;
+		sCookie = malloc(iLen+1);
+		memset(sCookie,'\0',iLen+1);
+		strncpy(sCookie,sCookies+iCookieStart,iLen);
+	}
     
     iSplitPos = lcStrStr(sCookie, "$");
-    if(iSplitPos > NAMEMAXLEN || iSplitPos == -1){
+    if(iSplitPos == -1){
         User->login = FALSE;
-        debug("can not find $ or name too long\n");
+        debug("can not find $\n");
+        lcFree(sCookie);
+        
         return FALSE;
     }
     
     sTmp = malloc(iSplitPos+1);
     strncpy(sTmp, sCookie, iSplitPos);
     sTmp[iSplitPos] = '\0';
-    
-    // remove "znc=" and decode the name
-    lcStrReplace(sTmp, "znc=", "");
     
     sName = base64_decode(sTmp, lcStrlen(sTmp), &i);
 	debug("sName: %s\n",sName);
@@ -142,6 +165,7 @@ _Bool lcAuthCheckCookie(struct mg_connection *conn,lcUser *User){
     if(lcStrlen(sMd5)!=32){
         User->login = FALSE;
         lcFree(sMd5);
+        lcFree(sCookie);
         debug("strlen of md5 != 32\n");
         return FALSE;
     }
@@ -154,7 +178,8 @@ _Bool lcAuthCheckCookie(struct mg_connection *conn,lcUser *User){
         debug("could not open passwordfile %s",sPasswdFile);
         syslog(LOG_CRIT, "could not open passwordfile %s",sPasswdFile);
         lcFree(sPasswdFile);
-
+		lcFree(sCookie);
+		
         User->login = FALSE;
         
         return FALSE;
@@ -177,6 +202,7 @@ _Bool lcAuthCheckCookie(struct mg_connection *conn,lcUser *User){
     if(iPos==-1){
         lcFree(sFileContent);
         lcFree(sPwEntrie);
+		lcFree(sCookie);
 		debug("sPwEntrie not found in file!\n");
         User->login = FALSE;
         return FALSE;
@@ -189,7 +215,8 @@ _Bool lcAuthCheckCookie(struct mg_connection *conn,lcUser *User){
     
     lcFree(sFileContent);
     lcFree(sPwEntrie);
-    free(sName);
+    lcFree(sCookie);
+    lcFree(sName);
     return TRUE;
 }
 
