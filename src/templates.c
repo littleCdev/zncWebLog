@@ -18,7 +18,7 @@ struct lcTemplate *lcTemplateLoad(char *sTemplate, struct lcUser *User){
     sprintf(sFilePath,"%s%s%s",CFG.WorkingDirectory,sHTMLPath,sTemplate);
     
     if (lcFileExists(sFilePath)==FALSE) {
-        debug("template.c: Template %s does not exist\n\r",sFilePath);
+        debug("Template %s does not exist\n\r",sFilePath);
         
         lcFree(sFilePath);
         return NULL;
@@ -87,7 +87,7 @@ int lcTemplateAddVariableString(struct lcTemplate *tpl, char *sName,char *sValue
 			tpl->vars->Variables[i]->sValue = realloc(tpl->vars->Variables[i]->sValue,strlen(sValue)+1);
 			strcpy(tpl->vars->Variables[i]->sValue,sValue);
 			tpl->vars->Variables[i]->sValue[strlen(sValue)] = '\0';
-			debug("template.c: reset %s to %s\n",sName,sValue);
+			debug("reset %s to %s\n",sName,sValue);
 	
 			free(sValue);
 			return 0;
@@ -341,7 +341,7 @@ int _lcTemplateCheckCodeblock(struct variableContainer *vars,codeblock *con){
 	
 	if(iConditionsFound > 1){
 		sprintf(con->sErrorMsg,"invalid amount of conditions! '%i'",iConditionsFound);
-		debug("template.c: %s\n",con->sErrorMsg);
+		debug("%s\n",con->sErrorMsg);
 		return -1;
 	}	
 	
@@ -382,7 +382,7 @@ int _lcTemplateCheckCodeblock(struct variableContainer *vars,codeblock *con){
 			case lcSmaller: 	sDelimiter = "<";	break;
 			default:		
 				sprintf(con->sErrorMsg,"invalid conditiontype");
-				debug("template.c: %s\n",con->sErrorMsg);
+				debug("%s\n",con->sErrorMsg);
 				return -1;			
 			break;
 		}		
@@ -400,7 +400,7 @@ int _lcTemplateCheckCodeblock(struct variableContainer *vars,codeblock *con){
 		
 		if(sVarName == NULL || sValue == NULL){
 			sprintf(con->sErrorMsg,"invalid value(%s) or name(%s)",sValue,sVarName);
-			debug("template.c: %s\n",con->sErrorMsg);
+			debug("%s\n",con->sErrorMsg);
 			return -1;
 		}
 	}
@@ -410,14 +410,14 @@ int _lcTemplateCheckCodeblock(struct variableContainer *vars,codeblock *con){
 	for(i=0;i<vars->iVariables;i++){
 		if(strcmp(sVarName,vars->Variables[i]->sName)==0){
 			iFound++;
-			debug("template.c: found: %s valuecmp:%s valuesrc:%s\n",sVarName,sValue,vars->Variables[i]->sValue);
+			debug("found: %s valuecmp:%s valuesrc:%s\n",sVarName,sValue,vars->Variables[i]->sValue);
 			break;
 		}
 	}
 	
 	if(iFound != 1 && ConditionType != lcIsSet){
 		sprintf(con->sErrorMsg,"undefined variable %s",sVarName);
-		debug("template.c: %s\n",con->sErrorMsg);
+		debug("%s\n",con->sErrorMsg);
 		free(sVarName);
 		free(sValue);
 		return -1;
@@ -526,7 +526,7 @@ int _lcTemplateCheckCodeblock(struct variableContainer *vars,codeblock *con){
 				iReturn = 1;
 		break;
 	}
-	debug("template.c: con->sErrorMsg: %s\n",con->sErrorMsg);
+	debug("con->sErrorMsg: %s\n",con->sErrorMsg);
 	lcFree(sVarName);
 	lcFree(sValue);
 	
@@ -571,7 +571,7 @@ int _processCodeblock(codeblock *con, struct lcTemplate *tpl ){
 		case 1: // true
 			if(con->Else->iStartPos == -1){
 				// remove {endif}
-				debug("template.c: Condition was true\n");
+				debug("Condition was true\n");
 				iLen = strlen(con->sText+con->Endif->iEndPos+1);
 				memmove(con->sText+con->Endif->iStartPos,con->sText+con->Endif->iEndPos+1,iLen);
 				con->sText[con->Endif->iStartPos+iLen] = '\0';
@@ -581,7 +581,7 @@ int _processCodeblock(codeblock *con, struct lcTemplate *tpl ){
 				memmove(con->sText+con->If->iStartPos,con->sText+con->If->iEndPos+1,iLen);
 				con->sText[con->If->iStartPos+iLen] = '\0';
 			}else{
-				debug("template.c: Condition was true, removing elsepart\n");
+				debug("Condition was true, removing elsepart\n");
 				// remove {else} -> {endif}
 				iLen = strlen(con->sText+con->Endif->iEndPos);
 				//														+/- 1 for the }					
@@ -599,14 +599,14 @@ int _processCodeblock(codeblock *con, struct lcTemplate *tpl ){
 		case -1: // false
 			// remove the true condition only
 			if(con->Else->iStartPos == -1){
-				debug("template.c: Condition was false\n");
+				debug("Condition was false\n");
 				iLen = strlen(con->sText+con->Endif->iEndPos+1);
 				memmove(con->sText+con->If->iStartPos,con->sText+con->Endif->iEndPos+1,iLen);
 
 				con->sText[con->If->iStartPos+iLen] = '\0';
 
 			}else{ // remove true condition and endif
-				debug("template.c: Condition was false, removing ifpart\n");
+				debug("Condition was false, removing ifpart\n");
 				// remove {endif}
 				iLen = strlen(con->sText+con->Endif->iEndPos+1);
 
