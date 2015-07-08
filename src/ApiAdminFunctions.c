@@ -113,6 +113,7 @@ int ApiAdminUserDelete(struct mg_connection *conn, struct lcUser *User){
 	// check if name exists in passwordfile
 	int i;
 	char *sPasswdFile	= lcStringCreate("%s%s",CFG.WorkingDirectory,CFG.sPasswdFile);
+	char *sErrorMsg 	= malloc(ERRORLEN);
 	char *sFileContent  = lcFileToString(sPasswdFile,&i);
 	tpl = lcTemplateLoad("admin/deleteUser.html",User);
 		
@@ -122,43 +123,25 @@ int ApiAdminUserDelete(struct mg_connection *conn, struct lcUser *User){
 	}else{
 		lcTemplateAddVariableString(tpl,"sUsername",sName);
 	}
-	
+
 	// delete user from passwdfile if POST
 	if(iNamePos != -1 && strcmp(conn->request_method,"POST")==0){
-		int   iLineEnd 			= iNamePos + lcStrStr(sFileContent+iNamePos,"\n");
-		char  *sNewFileContent 	= lcStringCreate("");
-		FILE  *fPasswdFile	;
 		
-		// cut the string at the start of the line (name -2)
-		sFileContent[iNamePos-2] = '\0';
-		
-		if(lcStrlen(sFileContent)>0)
-			lcStringAdd(sNewFileContent,"%s",sFileContent);
-		if(lcStrlen(sFileContent+iLineEnd)>0)
-			lcStringAdd(sNewFileContent,"%s",sFileContent+iLineEnd+1);
-			
-		fPasswdFile = fopen(sPasswdFile,"w+");
-		if(!fPasswdFile){
-			lcTemplateAddVariableString(tpl,"sMsg","failed to open/write passwordfile");
-			syslog(LOG_CRIT,"can not open (w+) passwordfile %s",sPasswdFile);
-			debug("can not open (w+) passwordfile %s",sPasswdFile);
+		if(!lcAuthUserDelete(sName,sErrorMsg)){
+			lcTemplateAddVariableString(tpl,"sMsg",sErrorMsg);
 		}else{
-			fputs(sNewFileContent,fPasswdFile);
-			fclose(fPasswdFile);
-			debug("deleted %s",sName);
-			syslog(LOG_INFO,"deleted %s",sName);
-			lcTemplateAddVariableString(tpl,"sMsg","deleted %s",sName);
+			lcTemplateAddVariableString(tpl,"sMsg","Deleted %s",sName);			
 		}
-		
-		free(sNewFileContent);
 	}
-	
+
 	lcTemplateSend(conn,tpl);
 	lcTemplateClean(tpl);
 	
 	free(sPasswdFile);
 	free(sFileContent);	
+	free(sErrorMsg);
 	free(sName);
+
 	return MG_TRUE;
 }
 

@@ -276,6 +276,54 @@ _Bool lcAuthAddUser(char *sName, char *sPass, _Bool Admin, char *sError){
     return TRUE;
 }
 
+_Bool lcAuthUserDelete(char *sName, char *sErrorMsg){
+	// check if name exists in passwordfile
+	int i;
+	char *sPasswdFile	= lcStringCreate("%s%s",CFG.WorkingDirectory,CFG.sPasswdFile);
+	char *sFileContent  = lcFileToString(sPasswdFile,&i);
+		
+	int iNamePos = lcStrStr(sFileContent,sName);
+	if(iNamePos==-1){
+		SETERROR(sErrorMsg,"the user does not exists");
+		
+		lcFree(sPasswdFile);
+		lcFree(sFileContent);
+		
+		return FALSE;
+	}
+	
+	int   iLineEnd 			= iNamePos + lcStrStr(sFileContent+iNamePos,"\n");
+	char  *sNewFileContent 	= lcStringCreate("");
+	FILE  *fPasswdFile	;
+		
+	// cut the string at the start of the line (name -2)
+	sFileContent[iNamePos-2] = '\0';
+		
+	if(lcStrlen(sFileContent)>0)
+		lcStringAdd(sNewFileContent,"%s",sFileContent);
+	if(lcStrlen(sFileContent+iLineEnd)>0)
+		lcStringAdd(sNewFileContent,"%s",sFileContent+iLineEnd+1);
+			
+	fPasswdFile = fopen(sPasswdFile,"w+");
+	if(!fPasswdFile){
+		SETERROR(sErrorMsg,"failed to open/write passwordfile");
+		syslog(LOG_CRIT,"can not open (w+) passwordfile %s",sPasswdFile);
+		debug("can not open (w+) passwordfile %s",sPasswdFile);
+	}else{
+		fputs(sNewFileContent,fPasswdFile);
+		fclose(fPasswdFile);
+		debug("deleted %s",sName);
+		syslog(LOG_INFO,"deleted %s",sName);
+		SETERROR(sErrorMsg,"deleted %s",sName);
+	}
+		
+	free(sNewFileContent);
+	free(sPasswdFile);
+	free(sFileContent);	
+	
+	return TRUE;
+}
+
 _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, char *sErrorMsg){
 
 	if(lcStrlen(sNewPasswd) == 0 || lcStrlen(sOldPasswd) == 0 ){
