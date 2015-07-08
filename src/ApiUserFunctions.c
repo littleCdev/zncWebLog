@@ -104,7 +104,7 @@ int ApiUserShowNetwork(struct mg_connection *conn, struct lcUser *User){
 				debug("open subdir: %s\n",sUserOrChanPath);
 				
 				sEncodeBuffer = lcStringCreate("%s",ep->d_name);
-				lcStrReplace(sEncodeBuffer,"#","%%23");
+				lcStrReplace(sEncodeBuffer,"#","%%%%23");
 				
 				if(dpSubDir!=NULL){
 					while((epSubDir=readdir(dpSubDir))){
