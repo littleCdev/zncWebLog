@@ -95,7 +95,7 @@ int ApiUserShowNetwork(struct mg_connection *conn, struct lcUser *User){
 				"<div class=\"panel-heading \">\n"
 				"<h3 class=\"panel-title slideup\" data=\"%s\"> <span class=\"glyphicon glyphicon-folder-close %s\" aria-hidden=\"true\"></span>%s</h3>\n"
 				"</div>\n"
-				"<div class=\"slideup %s\" data=\%s\">\n",sCssClassName,sCssClassName,ep->d_name,sCssClassName,sCssClassName);
+				"<div class=\"slideup %s\" data=\"%s\">\n",sCssClassName,sCssClassName,ep->d_name,sCssClassName,sCssClassName);
 				
 			char *sUserOrChanPath = lcStringCreate("%s%s/",sNetworkPath,ep->d_name);
 			if(lcFileIsDir(sUserOrChanPath,TRUE) == TRUE){
