@@ -335,7 +335,7 @@ int ApiUserChangePassword(struct mg_connection *conn, struct lcUser *User){
 		mg_get_var(conn, "newPasswd", sNewPw, NAMEMAXLEN);
 		mg_get_var(conn, "oldPasswd", sOldPw, PASSMAXLEN);
 		
-		if(lcAuthChangePassword(User->sName,sOldPw,sNewPw,sErrorMsg) == FALSE){
+		if(lcAuthChangePassword(User->sName,sOldPw,sNewPw,TRUE,sErrorMsg) == FALSE){
 			tpl = lcTemplateLoad("changePw.html",User);
 			lcTemplateAddVariableString(tpl,"Msg", sErrorMsg);		
 		}else{

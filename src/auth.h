@@ -42,7 +42,7 @@
 	_Bool lcAuthCheckCookie(struct mg_connection *conn,lcUser *User);
 	_Bool lcAuthAddUser(char *sName, char *sPass, _Bool Admin, char *sError);
 	_Bool lcAuthCheckLoginData(char *sName,char *sPass, char *sPassMd5);
-	_Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, char *sErrorMsg);
+	_Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Bool bVerifyOldpw, char *sErrorMsg);
 	_Bool lcAuthUserDelete(char *sName, char *sErrorMsg);
 	
 #endif

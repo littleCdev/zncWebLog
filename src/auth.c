@@ -324,14 +324,9 @@ _Bool lcAuthUserDelete(char *sName, char *sErrorMsg){
 	return TRUE;
 }
 
-_Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, char *sErrorMsg){
+_Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Bool bVerifyOldpw, char *sErrorMsg){
 
-	if(lcStrlen(sNewPasswd) == 0 || lcStrlen(sOldPasswd) == 0 ){
-		SETERROR(sErrorMsg,"invalid passwords");
-		return FALSE;
-	}
-	
-	if(lcStrlen(sOldPasswd) < 6){
+	if(bVerifyOldpw && lcStrlen(sOldPasswd) < 6){
 		SETERROR(sErrorMsg,"old password is invalid");
 		return FALSE;
 	}
@@ -339,40 +334,78 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, char
 		SETERROR(sErrorMsg,"new password is too short (6 char min)");
 		return FALSE;
 	}
+	
 	int  iSize			= 0;
+	int  iPwStartPos	= 0;
+	int  iLen			= 0;
+	int  iNamePos		= 0;
 	char *sPwFile		= lcStringCreate("%s%s",CFG.WorkingDirectory,CFG.sPasswdFile);
 	char *sOldPasswdMd5 = lcMd5FromString(sOldPasswd);
 	char *sNewPasswdMd5 = lcMd5FromString(sNewPasswd);
-	char *sPwEntrie 	= lcStringCreate("%s|%s",sUser,sOldPasswdMd5);
-	char *sNewPwEntrie 	= lcStringCreate("%s|%s",sUser,sNewPasswdMd5);
 	char *sFileContent 	= lcFileToString(sPwFile,&iSize);
+	char *sOldPwFromFile= lcStringCreate("");
 	
-	if(lcStrStr(sFileContent,sPwEntrie)==-1){
-		SETERROR(sErrorMsg,"your password is wrong");
+	iNamePos = lcStrStr(sFileContent,sUser);
+	if(iNamePos == -1){
+		SETERROR(sErrorMsg,"invalid user");
 		
-		free(sOldPasswdMd5);
-		free(sPwEntrie);
-		free(sPwFile);
-		free(sNewPasswdMd5);
-		free(sFileContent);
-		free(sNewPwEntrie);
+		lcFree(sPwFile);
+		lcFree(sOldPasswdMd5);
+		lcFree(sNewPasswdMd5);
+		lcFree(sFileContent);
+		lcFree(sOldPwFromFile);
 		
 		return FALSE;
 	}
 	
-	lcStrReplace(sFileContent,sPwEntrie,sNewPwEntrie);
+	iPwStartPos = lcStrStr(sFileContent+iNamePos,"|") + iNamePos+1; // +1 -> remove the |
+	iLen		= lcStrStr(sFileContent+iPwStartPos,"\r");
+	
+	if(iPwStartPos == 0 || iLen == -1){
+		SETERROR(sErrorMsg,"can not fing password");
+		debug("can not find password?");
+		
+		lcFree(sPwFile);
+		lcFree(sOldPasswdMd5);
+		lcFree(sNewPasswdMd5);
+		lcFree(sFileContent);
+		lcFree(sOldPwFromFile);
+		
+		return FALSE;
+	}
+	debug("iPwStartPos:%i",iPwStartPos);
+	debug("iLen:%i",iLen);
+	sOldPwFromFile = realloc(sOldPwFromFile,iLen+1);
+	strncpy(sOldPwFromFile,sFileContent+iPwStartPos,iLen);
+	sOldPwFromFile[iLen] = '\0';
+	debug("sOldPwFromFile:%s",sOldPwFromFile);
+	
+	if(bVerifyOldpw && strcmp(sOldPwFromFile,sOldPasswdMd5) != 0){
+		SETERROR(sErrorMsg,"Old password is invalid");
+		debug("old password is invalid");
+	
+		lcFree(sPwFile);
+		lcFree(sOldPasswdMd5);
+		lcFree(sNewPasswdMd5);
+		lcFree(sFileContent);
+		lcFree(sOldPwFromFile);
+		
+		return FALSE;
+	}
+	
+	debug("replacing %s with %s",sOldPwFromFile,sNewPasswdMd5);
+	lcStrReplace(sFileContent,sOldPwFromFile,sNewPasswdMd5);
 	
 	FILE *fPwFile = fopen(sPwFile,"w+");
 	if(!fPwFile){
 		syslog(LOG_CRIT,"cannot delete/write %s",sPwFile);
 		SETERROR(sErrorMsg,"Fatal error: cannot delete/write %s",sPwFile);
 		
-		free(sOldPasswdMd5);
-		free(sPwEntrie);
-		free(sPwFile);
-		free(sNewPasswdMd5);
-		free(sFileContent);
-		free(sNewPwEntrie);
+		lcFree(sPwFile);
+		lcFree(sOldPasswdMd5);
+		lcFree(sNewPasswdMd5);
+		lcFree(sFileContent);
+		lcFree(sOldPwFromFile);
 		
 		return FALSE;
 	}
@@ -380,12 +413,11 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, char
 	fputs(sFileContent, fPwFile);
 	fclose(fPwFile);
 	
-	free(sOldPasswdMd5);
-	free(sPwEntrie);
-	free(sPwFile);
-	free(sNewPasswdMd5);
-	free(sFileContent);
-	free(sNewPwEntrie);
+	lcFree(sPwFile);
+	lcFree(sOldPasswdMd5);
+	lcFree(sNewPasswdMd5);
+	lcFree(sFileContent);
+	lcFree(sOldPwFromFile);
 
 	return TRUE;
 }
