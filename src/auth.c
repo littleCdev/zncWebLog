@@ -421,3 +421,45 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Boo
 
 	return TRUE;
 }
+
+_Bool lcAuthUserChangeUsertype(char *sUser,lcUserType userType, char *sErrorMsg){
+	int  i 			   = 0;
+	int  iNamePos	   = -1;
+	char *sPasswdFile  = lcStringCreate("%s%s",CFG.WorkingDirectory,CFG.sPasswdFile);
+	char *sFileContent = lcFileToString(sPasswdFile,&i);
+	
+	iNamePos = lcStrStr(sFileContent,sUser);
+	if(iNamePos == -1){
+		SETERROR(sErrorMsg,"can not find User");
+		
+		lcFree(sPasswdFile);
+		lcFree(sFileContent);
+		
+		return FALSE;
+	}
+	
+	sFileContent[iNamePos-2] = userType == lcADMIN ? '1':'0';
+	
+	
+	FILE *fPwFile = fopen(sPasswdFile,"w+");
+	if(!fPwFile){
+		syslog(LOG_CRIT,"cannot delete/write %s",sPasswdFile);
+		SETERROR(sErrorMsg,"Fatal error: cannot delete/write %s",sPasswdFile);
+		
+		lcFree(sPasswdFile);
+		lcFree(sFileContent);
+		
+		return FALSE;
+	}
+	
+	fputs(sFileContent, fPwFile);
+	fclose(fPwFile);
+	
+	lcFree(sPasswdFile);
+	lcFree(sFileContent);
+	
+	syslog(LOG_INFO,"changed %s to %s",sUser,userType==lcADMIN?"Admin":"User");
+	debug("changed %s to %s",sUser,userType==lcADMIN?"Admin":"User");
+	
+	return TRUE;
+}

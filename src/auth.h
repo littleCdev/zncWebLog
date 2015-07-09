@@ -44,5 +44,5 @@
 	_Bool lcAuthCheckLoginData(char *sName,char *sPass, char *sPassMd5);
 	_Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Bool bVerifyOldpw, char *sErrorMsg);
 	_Bool lcAuthUserDelete(char *sName, char *sErrorMsg);
-	
+	_Bool lcAuthUserChangeUsertype(char *sUser,lcUserType userType, char *sErrorMsg);
 #endif
