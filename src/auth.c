@@ -344,6 +344,8 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Boo
 	char *sNewPasswdMd5 = lcMd5FromString(sNewPasswd);
 	char *sFileContent 	= lcFileToString(sPwFile,&iSize);
 	char *sOldPwFromFile= lcStringCreate("");
+	char *sPwEntrie		= lcStringCreate("");
+	char *sNewPwEntrie	= lcStringCreate("");
 	
 	iNamePos = lcStrStr(sFileContent,sUser);
 	if(iNamePos == -1){
@@ -354,7 +356,9 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Boo
 		lcFree(sNewPasswdMd5);
 		lcFree(sFileContent);
 		lcFree(sOldPwFromFile);
-		
+		lcFree(sPwEntrie);
+		lcFree(sNewPwEntrie);
+				
 		return FALSE;
 	}
 	
@@ -370,7 +374,9 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Boo
 		lcFree(sNewPasswdMd5);
 		lcFree(sFileContent);
 		lcFree(sOldPwFromFile);
-		
+		lcFree(sPwEntrie);
+		lcFree(sNewPwEntrie);
+				
 		return FALSE;
 	}
 	debug("iPwStartPos:%i",iPwStartPos);
@@ -389,12 +395,16 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Boo
 		lcFree(sNewPasswdMd5);
 		lcFree(sFileContent);
 		lcFree(sOldPwFromFile);
+		lcFree(sPwEntrie);
+		lcFree(sNewPwEntrie);
 		
 		return FALSE;
 	}
+	lcStringAdd(sPwEntrie,"|%s|%s",sUser,sOldPwFromFile);
+	lcStringAdd(sNewPwEntrie,"|%s|%s",sUser,sNewPasswdMd5);
 	
-	debug("replacing %s with %s",sOldPwFromFile,sNewPasswdMd5);
-	lcStrReplace(sFileContent,sOldPwFromFile,sNewPasswdMd5);
+	debug("replacing %s with %s",sPwEntrie,sNewPwEntrie);
+	lcStrReplace(sFileContent,sPwEntrie,sNewPwEntrie);
 	
 	FILE *fPwFile = fopen(sPwFile,"w+");
 	if(!fPwFile){
@@ -406,7 +416,9 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Boo
 		lcFree(sNewPasswdMd5);
 		lcFree(sFileContent);
 		lcFree(sOldPwFromFile);
-		
+		lcFree(sPwEntrie);
+		lcFree(sNewPwEntrie);
+				
 		return FALSE;
 	}
 	
@@ -418,7 +430,9 @@ _Bool lcAuthChangePassword(char *sUser, char *sOldPasswd, char *sNewPasswd, _Boo
 	lcFree(sNewPasswdMd5);
 	lcFree(sFileContent);
 	lcFree(sOldPwFromFile);
-
+	lcFree(sPwEntrie);
+	lcFree(sNewPwEntrie);
+	
 	return TRUE;
 }
 
