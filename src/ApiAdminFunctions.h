@@ -7,4 +7,5 @@
 	void _ApiAdminFreeUserList(lcUser **list,int iUsers);
 	int ApiAdminUsers(struct mg_connection *conn, struct lcUser *User);
 	int ApiAdminUserDelete(struct mg_connection *conn, struct lcUser *User);
+	int ApiAdminUserEdit(struct mg_connection *conn, struct lcUser *User);
 #endif

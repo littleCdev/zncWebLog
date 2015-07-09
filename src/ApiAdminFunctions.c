@@ -209,6 +209,97 @@ int ApiAdminUserAddGET(struct mg_connection *conn, struct lcUser *User){
     return MG_TRUE;
 }
 
+int ApiAdminUserEdit(struct mg_connection *conn, struct lcUser *User){
+	LOGINONLY
+	ADMINONLY
+	
+	int iNamePos = lcStrrStr((char *)conn->uri,"!");
+	struct lcTemplate *tpl;
+	
+	
+	if(iNamePos == -1){
+		tpl = lcTemplateLoad("error.html",User);
+		lcTemplateAddVariableString(tpl,"sErrorMsg","i can't find the user");
+		lcTemplateSend(conn,tpl);
+		lcTemplateClean(tpl);
+		
+		return MG_TRUE;
+	}
+	
+	char *sName = lcStringCreate("%s",conn->uri+iNamePos+1);
+	
+	// check if name exists in passwordfile
+	int i;
+	char *sPasswdFile	= lcStringCreate("%s%s",CFG.WorkingDirectory,CFG.sPasswdFile);
+	char *sErrorMsg 	= malloc(ERRORLEN);
+	char *sFileContent  = lcFileToString(sPasswdFile,&i);
+	tpl = lcTemplateLoad("admin/editUser.html",User);
+		
+	iNamePos = lcStrStr(sFileContent,sName);
+	if(iNamePos==-1){
+		lcTemplateAddVariableString(tpl,"sMsg","the user does not exists");
+	}else{
+		lcTemplateAddVariableString(tpl,"sUsername",sName);
+		if(sFileContent[iNamePos-2] == '1')
+			lcTemplateAddVariableString(tpl,"isAdmin","true");
+		debug("isAdmin:%c",sFileContent[iNamePos-2]);
+	}
+
+	// update if POST
+	if(iNamePos != -1 && strcmp(conn->request_method,"POST")==0){
+		char *sPass 	= malloc(PASSMAXLEN+1);
+		char *sAdmin  	= malloc(10);
+		char *sErrorMsg = malloc(ERRORLEN);
+		_Bool bStatus = TRUE;
+		
+		mg_get_var(conn, "NewPasswd", sPass, PASSMAXLEN+1);
+		mg_get_var(conn, "isAdmin", sAdmin, 10);
+		
+		debug("isAdmin:%s",sAdmin);
+		debug("sPass:%s",sPass);
+		
+		if(strlen(sAdmin) != 0){
+			bStatus = lcAuthUserChangeUsertype(sName,lcADMIN,sErrorMsg);
+		}else{
+			bStatus = lcAuthUserChangeUsertype(sName,lcUSER,sErrorMsg);
+		}
+		
+		if(!bStatus){
+			lcTemplateAddVariableString(tpl,"sMsg",sErrorMsg);
+		}else{
+			if(strlen(sPass) != 0){
+				bStatus = lcAuthChangePassword(sName,"",sPass,FALSE,sErrorMsg);
+			}
+		}
+		
+		if(!bStatus){
+			lcTemplateAddVariableString(tpl,"sMsg",sErrorMsg);
+		}else{
+			lcTemplateAddVariableString(tpl,"sMsg","updated %s",sName);
+			
+			if(strlen(sAdmin) != 0){
+				lcTemplateAddVariableString(tpl,"isAdmin","true");
+			}else{
+				lcTemplateAddVariableString(tpl,"isAdmin","");
+			}
+		}
+		
+		lcFree(sPass);
+		lcFree(sAdmin);
+		lcFree(sErrorMsg);
+	}
+
+	lcTemplateSend(conn,tpl);
+	lcTemplateClean(tpl);
+	
+	lcFree(sPasswdFile);
+	lcFree(sFileContent);	
+	lcFree(sErrorMsg);
+	lcFree(sName);
+
+	return MG_TRUE;
+}
+
 int ApiAdminShowIndex(struct mg_connection *conn, struct lcUser *User){
 
 	struct lcTemplate *tpl;
