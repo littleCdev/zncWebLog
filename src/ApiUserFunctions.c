@@ -115,11 +115,11 @@ int ApiUserShowNetwork(struct mg_connection *conn, struct lcUser *User){
 						debug("found Quer/Chane: %s\n",ep->d_name);
 						lcStringAdd(sHtmlList,
 						"<div class=\"panel-body\">\n"
-							"<a href=\"#\" class=\"text-muted\">\n"
+							"<a href=\"/log/download!%s/%s/%s\" class=\"text-muted\">\n"
 								"<span class=\"glyphicon glyphicon-download-alt\" aria-hidden=\"true\"></span>\n"
 							"</a>\n"
 							"<a href=\"/log/%s/%s/%s/\">%s%s</a>\n"
-						"</div>\n",pNetwork,sEncodeBuffer,epSubDir->d_name,ep->d_name,epSubDir->d_name);
+						"</div>\n",pNetwork,sEncodeBuffer,epSubDir->d_name,pNetwork,sEncodeBuffer,epSubDir->d_name,ep->d_name,epSubDir->d_name);
 					}
 					closedir(dpSubDir);
 				}else{
@@ -360,6 +360,68 @@ int ApiUserChangePassword(struct mg_connection *conn, struct lcUser *User){
 		lcTemplateSend(conn, tpl);
 		lcTemplateClean(tpl);
 	}
+	
+	return MG_TRUE;
+}
+
+int ApiUserDownloadLog(struct mg_connection *conn, struct lcUser *User){
+	LOGINONLY
+
+	struct lcTemplate *tpl;
+	
+	// url = /log/download/$Network/$chanQuery/$file
+	char *sUri 			= lcStringCreate("%s",conn->uri);
+	strtok(sUri,"!");
+	char *pNetwork		= strtok(NULL,"/");
+	char *pChanQuery	= strtok(NULL,"/");
+	char *pFileName		= strtok(NULL,"/");
+	char *sFilePath	;
+	
+	
+	debug("pNetwork:%s\npChanQuery:%s\npFileName:%s\n",pNetwork,pChanQuery,pFileName);
+		
+	if(!pNetwork || !pChanQuery || !pFileName){
+		tpl = lcTemplateLoad("error.html",User);
+		lcTemplateAddVariableString(tpl,"Msg","your url is invalid");
+		lcTemplateSend(conn,tpl);
+		lcTemplateClean(tpl);
+		
+		lcFree(sUri);
+		
+		return MG_TRUE;
+	}
+	
+	sFilePath = lcStringCreate("%s%s/%s/%s",User->sUserDir,pNetwork,pChanQuery,pFileName);
+
+	if(!lcFileExists(sFilePath)){
+		tpl = lcTemplateLoad("error.html",User);
+		lcTemplateAddVariableString(tpl,"Msg","your requested log does not exist");
+		lcTemplateSend(conn,tpl);
+		lcTemplateClean(tpl);
+		
+		lcFree(sUri);
+		lcFree(sFilePath);
+		
+		return MG_TRUE;		
+	}
+	
+	// header('Content-Description: File Transfer');
+	// header('Content-Disposition: attachment; filename="'.$filename.'"');
+	// header('Content-Type: application/force-download'); Non-standard MIME-Type, incompatible with Samsung C3050 for example.
+	int  iSize				= -1;
+	char *sHeaderFilename 	= lcStringCreate("attachment; filename=\"%s_%s_%s\"",pNetwork,pChanQuery,pFileName);
+	char *sFileContent		= lcFileToString(sFilePath,&iSize);
+	
+	debug("forcing download: %s",sHeaderFilename);
+	mg_send_header(conn,"Content-Description","File Transfer");
+	mg_send_header(conn,"Content-Disposition",sHeaderFilename);
+	mg_printf_data(conn,sFileContent);
+	
+	
+	lcFree(sHeaderFilename);
+	lcFree(sFileContent);
+	lcFree(sUri);
+	lcFree(sFilePath);
 	
 	return MG_TRUE;
 }

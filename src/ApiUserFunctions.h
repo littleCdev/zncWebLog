@@ -8,5 +8,7 @@
 	int ApiUserLogin(struct mg_connection *conn, struct lcUser *User);
 	int ApiUserChangePassword(struct mg_connection *conn, struct lcUser *User);
 	int ApiUserSendLogJson(struct mg_connection *conn, struct lcUser *User);
+	int ApiUserDownloadLog(struct mg_connection *conn, struct lcUser *User);
+	
 #endif
 
