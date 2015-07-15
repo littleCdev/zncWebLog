@@ -11,6 +11,7 @@
 	<div class="container-fluid">
 	  <h2>Network: {$sNetworkName}</h2>
 		<a id="loadMore" href="#">Load more!</a>
+		<a id="loadAll" href="#">Load all!</a>
 		<input id="endReached" type="hidden" value="{if bEndReached}1{else}0{endif}">
 		<input id="lines" type="hidden" value="{$iLines}">
 		<pre id="log">{$sLog}</pre>
@@ -50,6 +51,28 @@
 					$("#log").prepend(r.getValue("log"));
 					
 					$(document).scrollTop($("#"+posid).offset().top-50);
+				}
+				
+			};
+			r.submit();
+		});
+		
+		$("#loadAll").on("click",function(e){
+			e.preventDefault();
+			if(bEndReached == true)
+				return;
+			
+			var r = srq();
+			r.addData("Start",-1);
+			
+			r.success = function(e){
+				console.log(r.getValue("error"));
+				if(r.getValue("error")==1){
+				console.log("mauuuu?");
+					alert(r.getValue("msg"));
+				}else{
+					bEndReached = true;
+					$("#log").html(r.getValue("log"));
 				}
 				
 			};

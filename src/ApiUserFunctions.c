@@ -197,22 +197,31 @@ int ApiUserSendLogJson(struct mg_connection *conn, struct lcUser *User){
 	char *pChanQuery	= strtok(NULL,"/");
 	char *pFileName		= strtok(NULL,"/");
 	char *sFilePath	;
+	char *sLog;
+	
 	int	 iEndReached	= 42;
 	int i;
+	int iStartLine		= -1;
 	
 	char sStartLine[10] = {0};
 	mg_get_var(conn, "Start", sStartLine, 9);
-	int iStartLine = atoi(sStartLine);
-	iStartLine += CFG.iLogLines+1;
-	
-	debug("iStartLine: %i\n",iStartLine);
-	
+
 	debug("ApiUserShowLog: %s\n",conn->uri);
 	syslog(LOG_INFO,"ApiUserShowLog: %s\n",conn->uri);
-	
 	sFilePath = lcStringCreate("%s%s/%s/%s",User->sUserDir,pNetwork,pChanQuery,pFileName);
 
-	char *sLog = lcFileReadLines(sFilePath,iStartLine*-1,CFG.iLogLines,&iEndReached);
+
+
+	if(strcmp(sStartLine,"-1")==0){
+		sLog = lcFileToString(sFilePath,&i);
+	}else{
+		iStartLine = atoi(sStartLine);
+		iStartLine += CFG.iLogLines+1;
+		
+		debug("iStartLine: %i\n",iStartLine);
+	
+		sLog = lcFileReadLines(sFilePath,iStartLine*-1,CFG.iLogLines,&iEndReached);
+	}
 	
 	if(lcStrlen(sLog)==0){
 
