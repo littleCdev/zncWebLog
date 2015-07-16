@@ -8,7 +8,7 @@
     <body>
 	{include menu.html}
 	<div class="container-fluid">
-	  <h2>Network: {$sNetworkName}</h2>
+	  <h2>Network: <a href="/networks/">{$User.Name}</a>/{$sNetworkName}</h2>
 		<div class="panel panel-primary">
 			{$UsersAndChans}
 		</div>

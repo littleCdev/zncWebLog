@@ -175,6 +175,8 @@ int ApiUserShowLog(struct mg_connection *conn, struct lcUser *User){
 
 		tpl = lcTemplateLoad("showLog.html",User);
 		lcTemplateAddVariableString(tpl,"sNetworkName",pNetwork);
+		lcTemplateAddVariableString(tpl,"sFileName",pFileName);
+		lcTemplateAddVariableString(tpl,"sChanQuery",pChanQuery);
 		lcTemplateAddVariableString(tpl,"bEndReached",iEndReached==1?"true":"false");
 		lcTemplateAddVariableInt(tpl,"iLines",CFG.iLogLines);
 		lcTemplateAddVariableString(tpl,"sLog",sLog);

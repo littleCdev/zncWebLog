@@ -9,7 +9,7 @@
     <body>
 	{include menu.html}
 	<div class="container-fluid">
-	  <h2>Network: {$sNetworkName}</h2>
+	  <h2>Network:  <a href="/networks/">{$User.Name}</a>/<a href="/network/{$sNetworkName}">{$sNetworkName}</a>/{$sChanQuery}/{$sFileName}</h2>
 		<a id="loadMore" href="#">Load more!</a>
 		<a id="loadAll" href="#">Load all!</a>
 		<input id="endReached" type="hidden" value="{if bEndReached}1{else}0{endif}">
