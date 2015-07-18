@@ -5,6 +5,13 @@
 #include "templates.h"
 #include "files.h"
 
+int _qsortCompareFunction(const void *name1, const void *name2)
+{
+    const char *name1_ = *(const char **)name1;
+    const char *name2_ = *(const char **)name2;
+    return strcmp(name1_, name2_);
+}
+
 int ApiUserListNetworks(struct mg_connection *conn, struct lcUser *User){
 	LOGINONLY
 	NOROOTFUNC
@@ -14,13 +21,14 @@ int ApiUserListNetworks(struct mg_connection *conn, struct lcUser *User){
 	struct lcTemplate *tpl;
 	char *sNetworkPath;
 	char *sNetworkList;
+	char **asNetworks 	= malloc(1*sizeof(char*));
+	int	 iNetworks	  	= 0;
+	int	 i				= 0;
 	sNetworkPath = lcStringCreate("%s",User->sUserDir);
 	
 	tpl = lcTemplateLoad("listNetworks.html",User);
 
 	debug("ApiUserListNetworks: sNetworkpath: %s\n",sNetworkPath);
-	
-	sNetworkList = lcStringCreate("<ul class=\"list-group\">\n");
 	
 	dp = opendir (sNetworkPath);
 	if (dp != NULL){
@@ -32,14 +40,25 @@ int ApiUserListNetworks(struct mg_connection *conn, struct lcUser *User){
 			
 			if(lcFileIsDir(sTmp,TRUE) == TRUE){
 				debug("ApiUserListNetworks: found: %s/%s\n",User->sName,ep->d_name);
-				lcStringAdd(sNetworkList,"<li class=\"list-group-item\"><a href=\"/network/%s\">%s</a></li>\n",ep->d_name,ep->d_name);			
+				
+				asNetworks = realloc(asNetworks,(iNetworks+1)*sizeof(char *));
+				asNetworks[iNetworks] = lcStringCreate(ep->d_name);
+				iNetworks++;
 			}
 			free(sTmp);
 		}
 		(void) closedir (dp);
 	}
 	
+	qsort(asNetworks,iNetworks,sizeof(char *),_qsortCompareFunction);
+	
+	
+	sNetworkList = lcStringCreate("<ul class=\"list-group\">\n");
+	for(i=0;i<iNetworks;i++)
+			lcStringAdd(sNetworkList,"<li class=\"list-group-item\"><a href=\"/network/%s\">%s</a></li>\n",asNetworks[i],asNetworks[i]);			
 	lcStringAdd(sNetworkList,"</ul>");
+
+
 	
 	lcTemplateAddVariableString(tpl,"sNetworkList",sNetworkList);
 	lcTemplateSend(conn,tpl);
@@ -47,6 +66,9 @@ int ApiUserListNetworks(struct mg_connection *conn, struct lcUser *User){
 	
 	free(sNetworkList);
 	free(sNetworkPath);
+	for(i=0;i<iNetworks;i++)
+		free(asNetworks[i]);
+	free(asNetworks);
 	
 	return MG_TRUE;
 }
