@@ -82,10 +82,16 @@ int ApiUserShowNetwork(struct mg_connection *conn, struct lcUser *User){
 	char *sNetworkPath;
 	DIR *dp;
 	struct dirent *ep;    
-	DIR *dpSubDir;
-	struct dirent *epSubDir;
 	char *sHtmlList = lcStringCreate(" ");
 	char *sEncodeBuffer;
+	
+	char **asChanQueries= malloc(sizeof(char *));
+	int	 iChanQueries	= 0;
+	char **asLogFiles  	= malloc(sizeof(char *));
+	int  iLogFiles		= 0;
+	int  i				= 0;
+	int  b				= 0;
+	
 	
 	tpl = lcTemplateLoad("showNetwork.html",User);
 	
@@ -103,60 +109,79 @@ int ApiUserShowNetwork(struct mg_connection *conn, struct lcUser *User){
 	
 	debug("opening: %s\n",sNetworkPath);
 	dp = opendir (sNetworkPath);
+	
 	if (dp != NULL){
-		while ((ep = readdir(dp))){
-			
+		while( (ep = readdir(dp)) ){
 			if(strcmp(ep->d_name,".")==0 || strcmp(ep->d_name,"..")==0)
 				continue;
 			
-			char *sCssClassName = lcStringCreate("%s",ep->d_name);
+			asChanQueries = realloc(asChanQueries,(iChanQueries+1)*sizeof(char *));
+			asChanQueries[iChanQueries] = lcStringCreate(ep->d_name);
+			iChanQueries++;
+		}
+	
+		(void) closedir (dp);
+	}
+	debug("read chans & queries (%i)",iChanQueries);
+	
+	qsort(asChanQueries,iChanQueries,sizeof(char *),_qsortCompareFunction);
+
+	for(i=0;i<iChanQueries;i++){
+		char *sChanQueryPath = lcStringCreate("%s%s",sNetworkPath,asChanQueries[i]);
+		debug("opening chan/querie: %s",sChanQueryPath);
+			
+		dp = opendir(sChanQueryPath);
+		if( dp != NULL ){
+			
+			while( (ep = readdir(dp)) ){
+				if(strcmp(ep->d_name,".")==0 || strcmp(ep->d_name,"..")==0)
+					continue;
+				
+				asLogFiles = realloc(asLogFiles,(iLogFiles+1)*sizeof(char *));
+				asLogFiles[iLogFiles] = lcStringCreate(ep->d_name);
+				iLogFiles++;
+			}
+			
+			closedir(dp);
+		
+			qsort(asLogFiles,iLogFiles,sizeof(char *),_qsortCompareFunction);
+			
+			char *sCssClassName = lcStringCreate("%s",asChanQueries[i]);
 			lcStrReplace(sCssClassName,"#","_");
 			lcStrReplace(sCssClassName,".","_");
 			
 			lcStringAdd(sHtmlList,
-				"<div class=\"panel-heading \">\n"
+			"<div class=\"panel-heading \">\n"
 				"<h3 class=\"panel-title slideup\" data=\"%s\"> <span class=\"glyphicon glyphicon-folder-close %s\" aria-hidden=\"true\"></span>%s</h3>\n"
 				"</div>\n"
-				"<div class=\"slideup %s\" data=\"%s\">\n",sCssClassName,sCssClassName,ep->d_name,sCssClassName,sCssClassName);
+				"<div class=\"slideup %s\" data=\"%s\">\n",sCssClassName,sCssClassName,asChanQueries[i],sCssClassName,sCssClassName);
 				
-			char *sUserOrChanPath = lcStringCreate("%s%s/",sNetworkPath,ep->d_name);
-			if(lcFileIsDir(sUserOrChanPath,TRUE) == TRUE){
-				
-				dpSubDir = opendir(sUserOrChanPath);
-				debug("open subdir: %s\n",sUserOrChanPath);
-				
-				sEncodeBuffer = lcStringCreate("%s",ep->d_name);
-				lcStrReplace(sEncodeBuffer,"#","%%%%23");
-				
-				if(dpSubDir!=NULL){
-					while((epSubDir=readdir(dpSubDir))){
-						debug("+++%s\n",epSubDir->d_name);
-						if(strcmp(epSubDir->d_name,".")==0 || strcmp(epSubDir->d_name,"..")==0)
-							continue;
-
-						debug("found Quer/Chane: %s\n",ep->d_name);
-						lcStringAdd(sHtmlList,
+			sEncodeBuffer = lcStringCreate("%s",asChanQueries[i]);
+			lcStrReplace(sEncodeBuffer,"#","%%%%23");
+			
+			for(b=0;b<iLogFiles;b++){
+				lcStringAdd(sHtmlList,
 						"<div class=\"panel-body\">\n"
 							"<a href=\"/log/download!%s/%s/%s\" class=\"text-muted\">\n"
 								"<span class=\"glyphicon glyphicon-download-alt\" aria-hidden=\"true\"></span>\n"
 							"</a>\n"
 							"<a href=\"/log/%s/%s/%s/\">%s%s</a>\n"
-						"</div>\n",pNetwork,sEncodeBuffer,epSubDir->d_name,pNetwork,sEncodeBuffer,epSubDir->d_name,ep->d_name,epSubDir->d_name);
-					}
-					closedir(dpSubDir);
-				}else{
-					debug("opendir was null: %s\n",sUserOrChanPath);
-				}
-				
-				free(sEncodeBuffer);
+						"</div>\n",pNetwork,sEncodeBuffer,asLogFiles[b],pNetwork,sEncodeBuffer,asLogFiles[b],asChanQueries[i],asLogFiles[b]);
+				free(asLogFiles[b]);
 			}
-			free(sUserOrChanPath);
-			free(sCssClassName);
 			lcStringAdd(sHtmlList,"</div>\n");
+			
+			free(sCssClassName);
+			free(sEncodeBuffer);
+			free(asLogFiles);
+			asLogFiles = malloc(sizeof(char *));
+			iLogFiles = 0;
+		}else{
+	//		syslog(LOG_WARN,"failed to open: %s",sChanQueryPath);
 		}
-		(void) closedir (dp);
+		free(sChanQueryPath);
 	}
-	
+
 	lcTemplateAddVariableString(tpl,"sNetworkName",pNetwork);
 	lcTemplateAddVariableString(tpl,"UsersAndChans",sHtmlList);
 
@@ -164,6 +189,12 @@ int ApiUserShowNetwork(struct mg_connection *conn, struct lcUser *User){
 	lcTemplateClean(tpl);
 	free(sNetworkPath);
 	free(sHtmlList);
+
+	for(i=0;i<iChanQueries;i++)	free(asChanQueries[i]);
+	free(asChanQueries);
+	for(i=0;i<iLogFiles;i++)	free(asLogFiles[i]);
+	free(asLogFiles);
+
 	return MG_TRUE;
 }
 
