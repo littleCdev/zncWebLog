@@ -127,6 +127,21 @@ int lcTemplateAddVariableInt(struct lcTemplate *tpl, char *sName,int iValue){
 	return 0;
 }
 
+int lcTemplateAddVariableBool(struct lcTemplate *tpl, char *sName,_Bool bValue){
+	char *sValue;
+	
+	if(bValue)
+		asprintf(&sValue,"true");
+	else
+		asprintf(&sValue,"false");
+	
+	
+	lcTemplateAddVariableString(tpl,sName,sValue);
+	free(sValue);
+	
+	return 0;
+}
+
 
 
 codeblock *_lcTemplateFindCodeblock(char *s){
