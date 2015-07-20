@@ -14,15 +14,31 @@
 		<a id="loadAll" href="#">Load all!</a>
 		<input id="endReached" type="hidden" value="{if bEndReached}1{else}0{endif}">
 		<input id="lines" type="hidden" value="{$iLines}">
+		<input id="ClickAbleLinks" type="hidden" value="{$bClickAbleLinks}">
 		<pre id="log">{$sLog}</pre>
 	</div>	
 	<script>
+		function urlify(text) {
+			var urlRegex = /(https?:\/\/[^\s]+)/g;
+			return text.replace(urlRegex, function(url) {
+				return '<a href="' + url + '">' + url + '</a>';
+			})
+			// or alternatively
+			// return text.replace(urlRegex, '<a href="$1">$1</a>')
+		}
+
 		var bEndReached = false;
 		var iLines	= $("#lines").val();
+		var bClickAbleLinks = false;
 		
 		if($("#endReached").val() == 1)
 			bEndReached = true;
-			
+		
+		if($("#ClickAbleLinks").val() == "true"){
+			bClickAbleLinks = true;
+			var pre = $("#log");
+			pre.html(urlify(pre.html()));
+		}	
 		
 		$("#loadMore").on("click",function(e){
 			e.preventDefault();
@@ -49,6 +65,9 @@
 					
 					$("#log").prepend("<hr id=\""+posid+"\">");
 					$("#log").prepend(r.getValue("log"));
+					var pre = $("#log");
+					if(bClickAbleLinks)
+						pre.html(urlify(pre.html()));
 					
 					$(document).scrollTop($("#"+posid).offset().top-50);
 				}
@@ -72,9 +91,11 @@
 					alert(r.getValue("msg"));
 				}else{
 					bEndReached = true;
-					$("#log").html(r.getValue("log"));
+					var pre = $("#log");
+					pre.html(r.getValue("log"));
+					if(bClickAbleLinks)
+						pre.html(urlify(pre.html()));
 				}
-				
 			};
 			r.submit();
 		});

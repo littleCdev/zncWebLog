@@ -41,6 +41,7 @@
 		char 	*sZncUserDir;
 		char 	*sPasswdFile;
 		int		iLogLines;
+		_Bool	bClickAbleLinks;
 		char 	*sRootUser;
 		
 		/* the rest */
@@ -62,6 +63,7 @@
 			
 			.iLogVerbosity	= LOG_WARNING,
 			.iLogLines		= 200,
+			.bClickAbleLinks= true,
 			
 			.sZncUserDir	= "/home/littlecheetah/.znc/users",
 			.WorkingDirectory	= "/etc/zncWebLog/",

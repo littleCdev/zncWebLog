@@ -87,6 +87,7 @@ void loadIni(){
     CFG.iLogLines	= strtol(lcConfigGetString(Ini,"logLines"),NULL,0);
     CFG.sZncUserDir	= lcConfigGetString(Ini,"zncUserDir");
     CFG.bDebug		= strcmp(lcConfigGetString(Ini,"debug"),"1")==0?TRUE:FALSE;
+    CFG.bClickAbleLinks=strcmp(lcConfigGetString(Ini,"clickAbleLinks"),"1")==0?TRUE:FALSE;
     
 	char *sLoglevel = lcConfigGetString(Ini,"loglevel");
 	if(sLoglevel == NULL){

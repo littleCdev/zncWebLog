@@ -233,6 +233,7 @@ int ApiUserShowLog(struct mg_connection *conn, struct lcUser *User){
 		lcTemplateAddVariableString(tpl,"bEndReached",iEndReached==1?"true":"false");
 		lcTemplateAddVariableInt(tpl,"iLines",CFG.iLogLines);
 		lcTemplateAddVariableString(tpl,"sLog",sLog);
+		lcTemplateAddVariableBool(tpl,"bClickAbleLinks",CFG.bClickAbleLinks);
 	}
 	
 	lcTemplateSend(conn,tpl);
