@@ -149,6 +149,7 @@ int ApiUserShowNetwork(struct mg_connection *conn, struct lcUser *User){
 			char *sCssClassName = lcStringCreate("%s",asChanQueries[i]);
 			lcStrReplace(sCssClassName,"#","_");
 			lcStrReplace(sCssClassName,".","_");
+			lcStrReplace(sCssClassName,"`","_");
 			
 			lcStringAdd(sHtmlList,
 			"<div class=\"panel-heading \">\n"

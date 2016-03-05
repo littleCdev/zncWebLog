@@ -198,9 +198,9 @@ int main(void) {
 		RestApiAddRule(&Api,"/networks/"				,"GET"	,&ApiUserListNetworks	,STRCMP);
 		RestApiAddRule(&Api,"^/network/[A-Za-z0-9_\\-]+$"		,"GET"	,&ApiUserShowNetwork	,REGEX);
 		//		        	networkname	 	chan/query		   file
-		RestApiAddRule(&Api,"^/log/[A-Za-z0-9_\\-]+/[#A-Za-z0-9_\\-]+/[A-Za-z0-9_\\-]+\\.log/$"	,"GET"	,&ApiUserShowLog	,REGEX);
-		RestApiAddRule(&Api,"^/log/[A-Za-z0-9_\\-]+/[#A-Za-z0-9_\\-]+/[A-Za-z0-9_\\-]+\\.log/$"	,"POST"	,&ApiUserSendLogJson,REGEX);
-		RestApiAddRule(&Api,"^/log/download![A-Za-z0-9_\\-]+/[#A-Za-z0-9_\\-]+/[A-Za-z0-9_\\-]+\\.log$"	,"GET"	,&ApiUserDownloadLog,REGEX);
+		RestApiAddRule(&Api,"^/log/[A-Za-z0-9_\\-]+/[#A-Za-z0-9_\\-\\`]+/[A-Za-z0-9_\\-]+\\.log/$"	,"GET"	,&ApiUserShowLog	,REGEX);
+		RestApiAddRule(&Api,"^/log/[A-Za-z0-9_\\-]+/[#A-Za-z0-9_\\-\\`]+/[A-Za-z0-9_\\-]+\\.log/$"	,"POST"	,&ApiUserSendLogJson,REGEX);
+		RestApiAddRule(&Api,"^/log/download![A-Za-z0-9_\\-]+/[#A-Za-z0-9_\\-\\`]+/[A-Za-z0-9_\\-]+\\.log$"	,"GET"	,&ApiUserDownloadLog,REGEX);
 		// 					  /log/download!linux/hostserv/2015.log
 		RestApiAddRule(&Api,"/favicon.ico"				,"GET"	,&ApiFavIco				,STRCMP);
 		RestApiAddRule(&Api,"^/css/[A-Za-z0-9.-]+$"		,"GET"	,&ApiUserSendCssJs		,REGEX);
