@@ -5,6 +5,13 @@
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/ajax.js"></script>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			.preview{
+				max-height: 300px;
+				max-width: 500px;
+				display: block;
+			}
+	   	</style>
     </head>
     <body>
 	{include menu.html}
@@ -21,6 +28,9 @@
 		function urlify(text) {
 			var urlRegex = /(https?:\/\/[^\s]+)/g;
 			return text.replace(urlRegex, function(url) {
+				if(url.toLowerCase().match(/\.(jpeg|jpg|gif|png)$/) != null){
+					return '<a href="' + url + '"><img class="preview" src="' + url + '">' + url + '</a>';
+				}
 				return '<a href="' + url + '">' + url + '</a>';
 			})
 			// or alternatively
