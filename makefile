@@ -37,7 +37,7 @@ install: $(OUTNAME)
 	cp zncWebLogd /usr/local/bin/
 	cp ./install/init.d/zncWebLog /etc/init.d/
 	chmod 755 /etc/init.d/zncWebLog
-	cp ./install/config/* /etc/zncWebLog/*
+	cp -r ./install/config/* /etc/zncWebLog/
 	@echo adding rule to rsyslog
 	cp ./install/rsyslog.d/30-zncWebLog.conf /etc/rsyslog.d/30-zncWebLog.conf
 	-service rsyslog restart
