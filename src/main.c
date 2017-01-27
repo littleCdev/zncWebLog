@@ -77,21 +77,27 @@ void loadIni(){
 	}
 	
 	Ini = lcConfigLoad(CFGFILE);
-	CFG.bHttp	 	= strcmp(lcConfigGetString(Ini,"EnableHTTP"),"1")==0?TRUE:FALSE;
+	CFG.bHttp	= strcmp(lcConfigGetString(Ini,"EnableHTTP"),"1")==0?TRUE:FALSE;
 	CFG.sHttpPort 	= lcConfigGetString(Ini,"PortHTTP");
-	CFG.bHttps	 	= strcmp(lcConfigGetString(Ini,"EnableHTTPS"),"1")==0?TRUE:FALSE;
+	CFG.bHttps	= strcmp(lcConfigGetString(Ini,"EnableHTTPS"),"1")==0?TRUE:FALSE;
 	CFG.sHttpsPort 	= lcConfigGetString(Ini,"PortHTTPS");
-    CFG.sCertFile 	= lcConfigGetString(Ini,"CertFile");
+        CFG.sCertFile 	= lcConfigGetString(Ini,"CertFile");
 	CFG.sRootUser	= lcConfigGetString(Ini,"Rootuser");
-    CFG.sPasswdFile = lcConfigGetString(Ini,"PasswdFile");
-    CFG.iLogLines	= strtol(lcConfigGetString(Ini,"logLines"),NULL,0);
-    CFG.sZncUserDir	= lcConfigGetString(Ini,"zncUserDir");
-    CFG.bDebug		= strcmp(lcConfigGetString(Ini,"debug"),"1")==0?TRUE:FALSE;
-    CFG.bClickAbleLinks=strcmp(lcConfigGetString(Ini,"clickAbleLinks"),"1")==0?TRUE:FALSE;
+        CFG.sPasswdFile = lcConfigGetString(Ini,"PasswdFile");
+        CFG.iLogLines	= strtol(lcConfigGetString(Ini,"logLines"),NULL,0);
+        CFG.sZncUserDir	= lcConfigGetString(Ini,"zncUserDir");
+        CFG.bDebug      = strcmp(lcConfigGetString(Ini,"debug"),"1")==0?TRUE:FALSE;
+        CFG.bClickAbleLinks=strcmp(lcConfigGetString(Ini,"clickAbleLinks"),"1")==0?TRUE:FALSE;
     
 	char *sLoglevel = lcConfigGetString(Ini,"loglevel");
 	if(sLoglevel == NULL){
 		printf("loglevel not set!\n");
+		exit(1);
+	}
+	
+	if( CFG.bHttps == TRUE && lcFileExists(CFG.sCertFile)==FALSE){
+		printf("can not find CertFile %s \n",CFG.sCertFile);
+		syslog(LOG_CRIT,"can not find CertFile %s",CFG.sCertFile);
 		exit(1);
 	}
 	
@@ -134,6 +140,7 @@ int ApiFavIco(struct mg_connection *conn, struct lcUser *User){
 
 int main(void) {
     struct mg_server *server;
+    struct mg_server *httpsServer;
 	
 	bHttpFinished = FALSE;
 	
@@ -156,7 +163,15 @@ int main(void) {
     // Create and configure the server
 	server = mg_create_server(NULL, ev_handler);
 	mg_set_option(server, "listening_port", CFG.sHttpPort);
-
+	
+	if(CFG.bHttps){
+		char *sSSLParams = lcStringCreate("ssl://%s:%s",CFG.sHttpsPort,CFG.sCertFile);
+		
+		httpsServer = mg_create_server(NULL,ev_handler);
+		mg_set_option(httpsServer, "listening_port", sSSLParams);
+		
+		lcFree(sSSLParams);
+	}
 
 	// on first run you have to add a rootuser first
 	char *sPasswdFile = lcStringCreate("%s%s",CFG.WorkingDirectory,CFG.sPasswdFile);
@@ -171,6 +186,9 @@ int main(void) {
 
 		while(CFG.bFirstRun && CFG.bRunning){
 			mg_poll_server(server, 1000);
+			
+			if(CFG.bHttps)
+				mg_poll_server(httpsServer, 1000);
 		}
 		
 		// reload the config if CFG.iFirstRun is set to 0 when the user was added
@@ -219,6 +237,9 @@ int main(void) {
 		if(CFG.bHttp)
 			mg_start_thread(MongoseServe, server);
 		
+		if(CFG.bHttps)
+			mg_start_thread(MongoseServe, httpsServer);
+		
 		while(CFG.bRunning){
 			usleep(10000);
 		}
@@ -246,3 +267,4 @@ int main(void) {
 	
 	return 0;
 }
+

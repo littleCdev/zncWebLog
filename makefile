@@ -1,5 +1,5 @@
 CC		:= gcc
-CFLAGS  := -Wall -lpthread -lm -g -finput-charset=UTF-8 -D_GNU_SOURCE=1 -DMONGOOSE_ENABLE_THREADS
+CFLAGS  := -Wall -lpthread -lm -lssl -g -finput-charset=UTF-8 -D_GNU_SOURCE=1 -DMONGOOSE_ENABLE_THREADS -DNS_ENABLE_SSL 
 
 SRCDIR	:= src/
 OUTNAME := zncWebLogd
@@ -37,7 +37,7 @@ install: $(OUTNAME)
 	cp zncWebLogd /usr/local/bin/
 	cp ./install/init.d/zncWebLog /etc/init.d/
 	chmod 755 /etc/init.d/zncWebLog
-	cp ./install/config/zncWebLog.cfg /etc/zncWebLog/zncWebLog.cfg
+	cp ./install/config/* /etc/zncWebLog/*
 	@echo adding rule to rsyslog
 	cp ./install/rsyslog.d/30-zncWebLog.conf /etc/rsyslog.d/30-zncWebLog.conf
 	-service rsyslog restart
