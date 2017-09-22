@@ -183,6 +183,10 @@ char *lcFileReadLines(char *sFile,int iStart, int iAmount, int *iEndReached){
 			iEndPos = i;
 		}
 	}
+	// no newline at the end, take the fileend
+	if(iEndPos == -1)
+		iEndPos = iFileSize;
+
 	sFileContent[iEndPos] = '\0';
 	
 	int iLen = iEndPos-iStartPos;
